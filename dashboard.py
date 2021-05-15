@@ -1,20 +1,20 @@
+import json
 from flask import jsonify
 from game import Game
 from game_options import GameOptions
 
-GAME_PREFIX = "gameid"
+GAME_ID_PREFIX = "gameid"
 
 
 class Dashboard:
     def __init__(self):
         self.games = []
 
-    def create_game(self, options=GameOptions()):
-        game = Game(self.create_game_id(), options)
-        print(
-            f"{game.id_}: players count {len(game.players)}, columns {game.columns}, rows {game.rows}"
-        )
+    def create_game(self, data):
+        game = json.loads(data, object_hook=lambda config: Game(config))
+        game.id_ = self.create_game_id()
         self.games.append(game)
+
         return jsonify(gameId=game.id_)
 
     def add_games(self, games: [Game]):
@@ -22,7 +22,7 @@ class Dashboard:
             self.games.append(game)
 
     def create_game_id(self):
-        return f"{GAME_PREFIX}{len(self.games) + 1}"
+        return f"{GAME_ID_PREFIX}{len(self.games) + 1}"
 
     def get_games(self):
         return jsonify(games=[game.id_ for game in self.games])

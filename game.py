@@ -1,28 +1,65 @@
 from werkzeug.exceptions import BadRequest
-from game_options import GameOptions
 
-PLAYER_PREFIX = "player"
+FAILED_GAME_CREATION = "Failed to create Game. Config must have a valid attribute:"
+PLAYERS = "players"
+COLUMNS = "columns"
+ROWS = "rows"
+DONE = "DONE"
+IN_PROGRESS = "IN_PROGRESS"
 
 
 class Game:
-    def __init__(self, game_id, options=GameOptions()):
-        if not (game_id and options):
+    def __init__(self, config: object):
+        self.validate(config)
+
+        self.id_ = 0
+        self.players = config[PLAYERS],
+        self.columns = config[COLUMNS],
+        self.rows = config[ROWS]
+
+    def validate(self, config):
+        if not self.has_list_of_players(config):
             raise BadRequest(
-                "Malformed request -- game_id and options are required")
+                "Game creation failed: invalid 'players' in config")
 
-        if not (game_id and options):
-            pass
+        if not self.has_valid_columns(config):
+            raise BadRequest(
+                "Game creation failed: 'columns' must be an integer greater than 0 in config")
 
-        self.id_ = game_id
-        self.players = [
-            self.create_player(number_id) for number_id in range(options.player_count)
-        ]
-        self.columns = options.columns
-        self.rows = options.rows
+        if not self.has_valid_rows(config):
+            raise BadRequest(
+                "Game creation failed: 'columns' must be an integer greater than 0 in config")
 
-    def add_players(self, count):
-        for number_id in range(count + 1):
-            self.players.append(self.create_player(number_id))
+    def get_state(self):
+        state = {
+            PLAYERS: self.players,
+            "state": IN_PROGRESS  # TODO remove hard-coding,
+        }
 
-    def create_player(self, number_id):
-        return f"{PLAYER_PREFIX}{number_id}"
+    def has_list_of_players(self, config: object) -> bool:
+        if (
+            PLAYERS in config and
+            isinstance(config[PLAYERS], list) and
+            all(isinstance(name, str) for name in config[PLAYERS])
+        ):
+            return True
+
+        return False
+
+    def has_valid_columns(self, config):
+        if COLUMNS in config and type(config[COLUMNS]) is int and config[COLUMNS] > 0:
+            return True
+
+        return False
+
+    def has_valid_rows(self, config):
+        if ROWS in config and type(config[ROWS]) is int and config[ROWS] > 0:
+            return True
+
+        return False
+
+    # Note buggy behavior from  of BadRequest from werkzeug.exceptions:
+    # for some reason 'description' returns None when trying to use string interpolation
+    # We therefore can't use this method, however it could've saved us minor duplication
+    def create_failed_game_creation_message(self, attribute):
+        f"{FAILED_GAME_CREATION} {attribute}"

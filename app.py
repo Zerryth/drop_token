@@ -12,7 +12,7 @@ dashboard = Dashboard()
 
 @app.errorhandler(BadRequest)
 def handle_bad_request(e):
-    return "Malformed request", 400
+    return f"Malformed request. {e.description}", 400
 
 
 @app.route("/drop_token/<int:game_id>")
@@ -27,8 +27,7 @@ def get_state(game_id):
 @app.route("/drop_token", methods=["GET", "POST"])
 def get_games():
     if request.method == "POST":
-        req_json = request.get_json()
-        return dashboard.create_game(), 200
+        return dashboard.create_game(request.data), 200
     else:
         return dashboard.get_games(), 200
 
