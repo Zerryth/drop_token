@@ -22,8 +22,7 @@ def handle_not_found(err):
 
 @app.route("/drop_token/<game_id>/moves/<int:move_number>", methods=["GET"])
 def get_move(game_id, move_number):
-    res = dashboard.get_move(game_id, move_number)
-    return res, 200
+    return dashboard.get_move(game_id, move_number), 200
 
 
 @app.route("/drop_token/<game_id>/moves", methods=["GET"])
@@ -53,11 +52,6 @@ def get_games():
         return dashboard.create_game(request.data), 200
     else:
         return dashboard.get_games(), 200
-
-
-@app.route("/<name>")
-def hello(name):
-    return f"Hello, {name}!"
 
 
 @app.route("/")

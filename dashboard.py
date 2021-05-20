@@ -12,6 +12,9 @@ GAME_ID_PREFIX = "gameid"
 COLUMN = "column"
 START = "start"
 UNTIL = "until"
+MOVE = "MOVE"
+QUIT = "QUIT"
+TYPE = "type"
 
 
 class Dashboard:
@@ -29,9 +32,8 @@ class Dashboard:
         return jsonify(gameId=game.id_)
 
     def post_move(self, data: bytes, game_id: str, player_id: str) -> Response:
-        # TODO check if we need to use "type" prop of Move at all here
         move: Move = json.loads(
-            data, object_hook=lambda d: Move(d[COLUMN], player_id)
+            data, object_hook=lambda d: Move(player_id, MOVE, d[COLUMN])
         )
         game = self._find_game(game_id)
         move_res = game.execute(move)
@@ -56,16 +58,23 @@ class Dashboard:
 
     def get_moves(self, game_id: str, req_args):
         game: Game = self._find_game(game_id)
-        all_moves: [MoveAsDict] = [
-            move.as_dict() for move in game.moves
-        ]
+        all_moves: [MoveAsDict] = []
+
+        for move in game.moves:
+            move_as_dict = move.as_dict()
+            if (move_as_dict[TYPE] == QUIT):
+                move_as_dict.pop(COLUMN, None)
+
+            all_moves.append(move_as_dict)
+
         moves = self._handle_optional_moves_args(all_moves, req_args)
 
         return jsonify(moves=moves)
 
     def player_quits(self, game_id: str, player_id: str):
+        move: Move = Move(player_id, QUIT)
         game: Game = self._find_game(game_id)
-        game.player_quits(player_id)
+        game.player_quits(move)
 
     def _find_game(self, game_id: str) -> Game:
         target_game = None
