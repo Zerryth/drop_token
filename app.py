@@ -15,13 +15,14 @@ def handle_bad_request(e):
     return f"Malformed request. {e.description}", 400
 
 
-@app.route("/drop_token/<int:game_id>")
+@app.route("/drop_token/<game_id>/<player_id>", methods=["POST"])
+def post_move(game_id, player_id):
+    return "MOVE POSTED", 200
+
+
+@app.route("/drop_token/<game_id>")
 def get_state(game_id):
-    return {
-        "players": ["player1", "player2"],
-        "state": "IN_PROGRESS",
-        "game_id": f"{game_id} -- REMEMBER TO DELETE ME!",
-    }
+    return dashboard.get_game_state(game_id), 200
 
 
 @app.route("/drop_token", methods=["GET", "POST"])
@@ -39,14 +40,7 @@ def hello(name):
 
 @app.route("/")
 def hello_world():
-    # games = database["games"].append(Game())
-    # games_count = len(database["games"])
-    # return f"<p>database count {games_count} </p>"
-    return "home"
-
-
-# TODO - put all the homework APIs / routes here, even with hardcoded values
-# then continue reading documentation as needed
+    return "<h1>Drop Token 98point6</h1"
 
 
 if __name__ == "__main__":

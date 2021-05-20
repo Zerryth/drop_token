@@ -1,4 +1,5 @@
 from werkzeug.exceptions import BadRequest
+from typing import Dict
 
 FAILED_GAME_CREATION = "Failed to create Game. Config must have a valid attribute:"
 PLAYERS = "players"
@@ -20,7 +21,7 @@ class Game:
     def validate(self, config):
         if not self.has_list_of_players(config):
             raise BadRequest(
-                "Game creation failed: invalid 'players' in config")
+                "Game creation failed: missing or invalid 'players' in config")
 
         if not self.has_valid_columns(config):
             raise BadRequest(
@@ -30,10 +31,11 @@ class Game:
             raise BadRequest(
                 "Game creation failed: 'columns' must be an integer greater than 0 in config")
 
-    def get_state(self):
-        state = {
+    def get_state(self) -> Dict[str, object]:
+        return {
             PLAYERS: self.players,
-            "state": IN_PROGRESS  # TODO remove hard-coding,
+            "state": IN_PROGRESS  # TODO remove hard-coding
+            # TODO create determine winner logic
         }
 
     def has_list_of_players(self, config: object) -> bool:
@@ -46,13 +48,13 @@ class Game:
 
         return False
 
-    def has_valid_columns(self, config):
+    def has_valid_columns(self, config) -> bool:
         if COLUMNS in config and type(config[COLUMNS]) is int and config[COLUMNS] > 0:
             return True
 
         return False
 
-    def has_valid_rows(self, config):
+    def has_valid_rows(self, config) -> bool:
         if ROWS in config and type(config[ROWS]) is int and config[ROWS] > 0:
             return True
 
