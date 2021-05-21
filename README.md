@@ -12,3 +12,11 @@ Written in Python 3 using Flask.
   - `env/Scripts/activate`
 - Install dependencies:
   - `pip install -r requirements.txt`
+
+---
+
+```mermaid
+graph LR
+
+Routes --> Dashboard --> Game --> GameMechanics
+```

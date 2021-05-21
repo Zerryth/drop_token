@@ -60,6 +60,10 @@ class Game:
         self.moves.append(move)
         self.players.remove(player)
 
+        if len(self.players) == 1:
+            self.status = DONE
+            self.winner = self.players[0]
+
     def _validate(self, config):
         if not self._has_list_of_players(config):
             raise BadRequest(
